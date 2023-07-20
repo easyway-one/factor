@@ -23,7 +23,7 @@ def make_data_dir(dir: str, descr: str):
   else:
     print(descr, "(", dir, "): обнаружена", sep="")
 
-# Очищает папку с локальной копией репо
+# Очищение папки с локальной копией репо
 def clear_data_dir(dir: str):
   '''Clears local repo cache'''
   for d in os.scandir(dir):
@@ -50,7 +50,9 @@ def read_glob_file(glob_file: str, descr: str):
   print(descr, ": чтение завершено")
   return data
 
+# Создание списка нужных файлов/папок из репо Git
 def git_go_mark_undel(dir: str, masks):
+  '''Makes needful files/dirs in Git repo '''
   need = False
   need0 = False
   need1 = False
@@ -72,7 +74,9 @@ def git_go_mark_undel(dir: str, masks):
       need = need or need0 or need1
   return files_list, need
 
+# Создание списка нужных файлов/папок из репо SVNs
 def svn_go_mark_undel(dir: str, masks):
+  '''Makes needful files/dirs in SVN repo '''
   need = False
   need0 = False
   need1 = False

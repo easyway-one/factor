@@ -188,7 +188,6 @@ if not git_local_repo_found:
       print("Git, локальная копия: репозиторий не найден")
     else:
       print("Git, локальная копия: неопознанная ошибка")
-    exit(0)
     print("Git, локальная копия: Останов")
     exit(2)
   else:
@@ -202,7 +201,6 @@ git_need_files = {}
 pwd = os.getcwd()
 os.chdir(git_local_repo_cache);    
 git_need_files, null = svngitsynclib.git_go_mark_undel("./", git_glob_list)
-print(git_need_files)
 os.chdir(pwd)
 
 # Список файлов/папок, которые надо перенести из SVN в Git: svn_need_files
@@ -210,7 +208,6 @@ svn_need_files = {}
 pwd = os.getcwd()
 os.chdir(svn_local_repo_cache);    
 svn_need_files = svngitsynclib.svn_go_mark_undel("./", svn_glob_list)
-print(svn_need_files)
 os.chdir(pwd)
 
 # Проверка на пересечение списков файлов/папок SVN и Git
@@ -234,13 +231,23 @@ if " ".join(svn_files_pack).strip() == "":
   print("Список файлов/папок для копирования из SVN в Git: ошибка! Список пустой. Останов")
   exit(0) # Поставил нулевой код завершения, т.к. отсутствие файлов для переноса не совсем ошибка
 
+# Удаление ненужных файлов/папок ил локального репо Git
+print("Удаление ненужных файлов/папок из локального репо Git: ...")
+for file in git_need_files:
+  if not git_need_files[file]:
+    delobj = git_local_repo_cache + file[2:]
+    if os.path.isdir(delobj):
+      shutil.rmtree(delobj)
+    if os.path.isfile(delobj):
+      os.remove(delobj)
+print("Удаление ненужных файлов/папок из локального репо Git: завершено")
+
 # Копирование файлов/папок для копирования из SVN в Git
 print("Копирование файлов/папок из SVN в Git: ...")
 pwd = os.getcwd()
 os.chdir(svn_local_repo_cache)
-print("tar -cf - " + " ".join(svn_files_pack) + " | (cd ../../" + git_local_repo_cache + " && tar xvf -)")
 try:
-  os.system("tar -cf - " + " ".join(svn_files_pack) + " | (cd ../../" + git_local_repo_cache + " && tar xvf -)")
+  os.system("tar -cf - " + " ".join(svn_files_pack) + " | (cd ../../" + git_local_repo_cache + " && tar xf -)")
 except:
   print("Копирование файлов/папок из SVN в Git: ошибка!")
   exit(1)
