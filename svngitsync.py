@@ -87,7 +87,6 @@ if len(glob_intersect):
     print("'", i, "'", sep="", end=" ")
   exit(2)
 
-
 # Проверка/создание общей папки локальных репо
 svngitsynclib.make_data_dir(common_local_repo_cache, "Общая папка для локальных репозиториев")
 
@@ -131,14 +130,14 @@ if not svn_local_repo_found:
       svn_local_repo_cache,
       revision=pysvn.Revision(pysvn.opt_revision_kind.number, config.svn_rev))
   except Exception as e:
-    e = str(e)
-    if "callback_get_login" in e:
+    error = str(e)
+    if "callback_get_login" in error:
       print("SVN, локальная копия: ошибка авторизации")
-    elif "Can't connect to host" in e:
+    elif "Can't connect to host" in error:
       print("SVN, локальная копия: сервер недоступен")
-    elif "No repository found" in e:
+    elif "No repository found" in error:
       print("SVN, локальная копия: репозиторий не найден")
-    elif "No such revision" in e:
+    elif "No such revision" in error:
       print("SVN, локальная копия: отсутствует ревизия", config.svn_rev)
     else:
       print("SVN, локальная копия: неопознанная ошибка")
@@ -173,7 +172,6 @@ if os.path.isdir(git_local_repo_cache + ".git"):
 else:
   git_local_repo_found = False
 
-#exit(0)
 # Создание локальной копии
 if not git_local_repo_found:
   print("Git, локальная копия: копирование из удаленного репо")
@@ -181,12 +179,12 @@ if not git_local_repo_found:
     git_repo = Repo()
     git_repo.clone_from(config.git_linkrepo, git_local_repo_cache)
   except Exception as e:
-    print(e.stderr)
-    if "Authentication failed" in e.stderr:
+    error = str(e.stderr)
+    if "Authentication failed" in error:
       print("Git, локальная копия: ошибка авторизации")
-    elif "Couldn't connect to server" in e.stderr:
+    elif "Couldn't connect to server" in error:
       print("Git, локальная копия: сервер недоступен")
-    elif "repository" in e.stderr and "not found" in e.stderr:
+    elif "repository" in error and "not found" in error:
       print("Git, локальная копия: репозиторий не найден")
     else:
       print("Git, локальная копия: неопознанная ошибка")
