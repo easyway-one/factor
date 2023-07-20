@@ -10,8 +10,7 @@ def read_glob_file(glob_file: str):
         data.append(line)
   return data
 
-import os
-import fnmatch
+import os, shutil, fnmatch
 
 
 dir_data = "tmp/"
@@ -64,15 +63,17 @@ def svn_go_mark_undel(dir: str) -> bool:
       #need = need or need0 or need1
   #return need
 
+git_dir_data = "tmp/git/"
 git_need_files = {}
 pwd = os.getcwd()
-os.chdir(dir_data);    
+os.chdir(git_dir_data);    
 git_go_mark_undel("./")
 os.chdir(pwd)
 
+svn_dir_data = "tmp/svn/"
 svn_need_files = {}
 pwd = os.getcwd()
-os.chdir(dir_data);    
+os.chdir(svn_dir_data);    
 svn_go_mark_undel("./")
 os.chdir(pwd)
 
@@ -81,7 +82,23 @@ for files in git_need_files:
     error = git_need_files[files] and svn_need_files[files]
   else:
     error = False
-  print(files, error)
+  if error:
+    print("error")
+    exit(0)
+  print(files[2:])
 
-# for files in svn_need_files:
-#   print(files, svn_need_files[files])
+svn_files_pack = []
+for files in svn_need_files:
+  if svn_need_files[files]:
+    svn_files_pack.append(files[2:])
+
+pwd = os.getcwd()
+os.chdir(svn_dir_data);    
+os.system("tar -cpf patch.tar " + " ".join(svn_files_pack))
+os.chdir(pwd)
+shutil.move(svn_dir_data + "patch.tar", git_dir_data + "patch.tar")
+os.chdir(git_dir_data);    
+os.system("tar -xf patch.tar")
+os.remove("patch.tar")
+os.chdir(pwd)
+
