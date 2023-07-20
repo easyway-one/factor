@@ -40,9 +40,9 @@ from git.repo import Repo
 import svngitsynclib
 
 ### Определение внутренних переменных, потом можно вынести в отдельный конфиг
-common_local_repo_cache = "cache/" # не должно быть текущей папкой
-svn_glob_file = "svn.txt"
-git_glob_file = "git.txt"
+common_local_repo_cache = "cache/" # Имя общей папки для локальных копий репо SVN и Git, не должно быть текущей папкой
+svn_glob_file = "svn.txt" # Файл glob-масок для SVN
+git_glob_file = "git.txt" # Файл glob-масок для Git
 
 
 
@@ -73,10 +73,12 @@ if svn_urlcheck.scheme != 'svn':
   exit(2)
 
 # Проверка на совпадающие записи в файлах с glob-масками исключений
+# Список glob-масок для SVN
 svn_glob_list = svngitsynclib.read_glob_file(svn_glob_file, "SVN, файл с glob-масками")
+# Список glob-масок для Git
 git_glob_list = svngitsynclib.read_glob_file(git_glob_file, "Git, файл с glob-масками")
 
-glob_intersect = []
+glob_intersect = [] # Список совпадающих glob-масок для SVN и Git
 for i in svn_glob_list:
   if i in git_glob_list and i not in glob_intersect:
     glob_intersect.append(i)
@@ -88,11 +90,14 @@ if len(glob_intersect):
   exit(2)
 
 # Проверка/создание общей папки локальных репо
+# Относительный путь обей папки локальных копий репо SVN и Git
 svngitsynclib.make_data_dir(common_local_repo_cache, "Общая папка для локальных репозиториев")
 
 # Проверка/создание папок локальных репо SVN и Git
+# Относительный путь папки локальной копии репо SVN
 svn_local_repo_cache = common_local_repo_cache + hashlib.md5(config.svn_linkrepo.encode()).hexdigest() + "/"
 svngitsynclib.make_data_dir(svn_local_repo_cache, "Папка для локального репозитория SVN")
+# Относительный путь папки локальной копии репо Git
 git_local_repo_cache = common_local_repo_cache + hashlib.md5(config.git_linkrepo.encode()).hexdigest() + "/"
 svngitsynclib.make_data_dir(git_local_repo_cache, "Папка для локального репозитория Git")
 
@@ -101,7 +106,7 @@ svngitsynclib.make_data_dir(git_local_repo_cache, "Папка для локал�
 # Обновление локальной копии или
 # Выгрузка удаленного репо SVN в локальную папку
 svn_repo = pysvn.Client()
-svn_local_repo_found = True
+svn_local_repo_found = True # Флаг наличия/отутствия локальной копии репо SVN (True/False)
 print("SVN, локальная копия: поиск...")
 
 # Обновление локальной копии на нужную ревизию, 
@@ -123,8 +128,8 @@ else:
 # Создание локальной копии
 if not svn_local_repo_found:
   print("SVN, локальная копия: копирование из удаленного репо")
-  svn_repo.set_default_username(config.svn_user)
-  svn_repo.set_default_password(config.svn_pass)
+  svn_repo.set_default_username(config.svn_user) # Задание логина по-умолчанию для выключения запроса на ввод логина
+  svn_repo.set_default_password(config.svn_pass) # Задание пароля по-умолчанию для выключения запроса на ввод пароля
   try:
     svn_repo.checkout(config.svn_linkrepo, 
       svn_local_repo_cache,
@@ -151,7 +156,7 @@ if not svn_local_repo_found:
 ### Git
 # Обновление локальной копии или
 # Выгрузка удаленного репо Git в локальную папку
-git_local_repo_found = True
+git_local_repo_found = True # Флаг наличия/отутствия локальной копии репо Git (True/False)
 print("Git, локальная копия: поиск...")
 
 # Обновление локальной копии на нужную ревизию, 
@@ -197,14 +202,14 @@ if not git_local_repo_found:
 ### Работа со списками файлов/папок, соответствующих glob-маскам SVN и Git
 
 # Список файлов/папок, которые нельзя удалять из Git репо: git_need_files
-git_need_files = {}
+git_need_files = {} # Словарь "относительный путь файла/папки": True/False (Оставлять в Git / Нет)
 pwd = os.getcwd()
 os.chdir(git_local_repo_cache);    
 git_need_files, null = svngitsynclib.git_go_mark_undel("./", git_glob_list)
 os.chdir(pwd)
 
 # Список файлов/папок, которые надо перенести из SVN в Git: svn_need_files
-svn_need_files = {}
+svn_need_files = {} # Словарь "относительный путь файла/папки": True/False (Копировать в Git / Нет)
 pwd = os.getcwd()
 os.chdir(svn_local_repo_cache);    
 svn_need_files = svngitsynclib.svn_go_mark_undel("./", svn_glob_list)
@@ -221,7 +226,7 @@ for files in git_need_files:
     exit(1)
 
 # Создание списка файлов/папок для копирования из SVN в Git
-svn_files_pack = []
+svn_files_pack = [] # список файлов/папок для копирования из SVN в Git
 for files in svn_need_files:
   if svn_need_files[files]:
     svn_files_pack.append(files[2:])

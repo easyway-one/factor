@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 # Для работы с файлами/папками
 
+print(type({}))
+
+
+exit(0)
 def read_glob_file(glob_file: str):
   '''Read glob-file into array'''
   data = []

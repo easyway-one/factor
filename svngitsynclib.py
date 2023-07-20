@@ -1,15 +1,29 @@
 import os, shutil, fnmatch
 
 # Удаление финального слеша в URL репо для унификации папок локальных копий репо
-def remove_trail_slash(url: str):
-  '''Takes repo URL for removing trailing slash'''
+def remove_trail_slash(url: str) -> str:
+  '''
+  Удаляет финальный "/" из переданного URL
+  
+  Параметры:
+  url (str): URL удаленного репо
+  
+  Возвращает: 
+  url (str): URL удаленного репо без финального "/"
+  '''
   if url.endswith('/'):
     url = url[:-1]
   return url
 
 # Проверка на существование/создание папок для локальных копий репо
 def make_data_dir(dir: str, descr: str):
-  '''Checks data dir if exists and create if not exists'''
+  '''
+  Проверяет, существует ли заданная папка, и создает ее, если нет
+  
+  Параметры:
+  dir (str): путь к папке
+  descr(str): описание папки для логирования в stdout
+  '''
   if os.path.isdir(dir) == False:
     print(descr, "(", dir, "): не обнаружена", sep="")
     try:
@@ -25,7 +39,12 @@ def make_data_dir(dir: str, descr: str):
 
 # Очищение папки с локальной копией репо
 def clear_data_dir(dir: str):
-  '''Clears local repo cache'''
+  '''
+  Очищает папку локальной копии репо
+  
+  Параметры:
+  dir (str): путь к папке
+  '''
   for d in os.scandir(dir):
     if d.is_dir():
       shutil.rmtree(d.path)
@@ -33,9 +52,15 @@ def clear_data_dir(dir: str):
       os.remove(d.path)
   
 # Чтение glob-масок из файлов    
-def read_glob_file(glob_file: str, descr: str):
-  '''Read glob-file into array'''
-  data = []
+def read_glob_file(glob_file: str, descr: str) -> list:
+  '''
+  Возвращает список масок из заданного файла
+  
+  Параметры:
+  glob_file (str): путь к файлу с glob-масками
+  descr(str): описание файла для логирования в stdout
+  '''
+  data = [] # Инициализация списка glob-масок
   print(descr, ": чтение...")
   try:
     f = open(glob_file, "r")
@@ -51,11 +76,22 @@ def read_glob_file(glob_file: str, descr: str):
   return data
 
 # Создание списка нужных файлов/папок из репо Git
-def git_go_mark_undel(dir: str, masks):
-  '''Makes needful files/dirs in Git repo '''
-  need = False
-  need0 = False
-  need1 = False
+def git_go_mark_undel(dir: str, masks: list) -> tuple:
+  '''
+  Создает словарь "относительный путь файла/папки": True/False (Оставлять в Git / Нет)
+  на основе переданного списка glob-масок
+  
+  Параметры:
+  dir (str): путь к папке локальной копии репо Git
+  masks (list): список glob-масок
+  
+  Возвращает:
+  files_list (dict): словарь "относительный путь файла/папки": True/False (Оставлять в Git / Нет)
+  need (bool): логическая переменная для передачи флага "нужности" папки уровнем выше при выходе из рекурсии
+  '''
+  need = False # Флаг "нужности" родительской папки для передачи на уровень выше при выходе из рекурсии
+  need0 = False # Флаг "нужности" файла/папки в текущей папке
+  need1 = False # Флаг "нужности" дочерней папки
   files_list = {}
   for dirEntry in os.scandir(dir):
     if dirEntry.name != '.git':
@@ -75,11 +111,21 @@ def git_go_mark_undel(dir: str, masks):
   return files_list, need
 
 # Создание списка нужных файлов/папок из репо SVNs
-def svn_go_mark_undel(dir: str, masks):
-  '''Makes needful files/dirs in SVN repo '''
-  need = False
-  need0 = False
-  need1 = False
+def svn_go_mark_undel(dir: str, masks: list) -> dict:
+  '''
+  Создает словарь "относительный путь файла/папки": True/False (Оставлять в SVN / Нет)
+  на основе переданного списка glob-масок
+  
+  Параметры:
+  dir (str): путь к папке локальной копии репо SVN
+  masks (list): список glob-масок
+  
+  Возвращает:
+  files_list (dict): словарь "относительный путь файла/папки": True/False (Оставлять в SVN / Нет)
+  '''
+  need = False # Флаг "нужности" родительской папки для передачи на уровень выше при выходе из рекурсии
+  need0 = False # Флаг "нужности" файла/папки в текущей папке
+  need1 = False # Флаг "нужности" дочерней папки
   files_list = {}
   for dirEntry in os.scandir(dir):
     if dirEntry.name != '.svn':
