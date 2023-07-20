@@ -60,7 +60,7 @@ config.svn_linkrepo = svngitsynclib.remove_trail_slash(config.svn_linkrepo)
 
 # Тестовый блок, чтобы не забивать комстроку
 config.svn_linkrepo = "svn://192.168.0.98/repo/factor-test"
-config.svn_user = "user-"
+config.svn_user = "user"
 config.svn_pass = "pass"
 config.svn_rev = "2"
 config.git_linkrepo = "http://giteuser:passpass@192.168.0.98:3000/factor/test.git"
@@ -132,18 +132,19 @@ if not svn_local_repo_found:
       revision=pysvn.Revision(pysvn.opt_revision_kind.number, config.svn_rev))
   except Exception as e:
     e = str(e)
-    print("-", e, "-")
-    if "qwe" in e:
+    if "callback_get_login" in e:
       print("SVN, локальная копия: ошибка авторизации")
     elif "Can't connect to host" in e:
-      print("Git, локальная копия: сервер недоступен")
-    elif "repository" in e and "not found" in e:
-      print("Git, локальная копия: репозиторий не найден")
+      print("SVN, локальная копия: сервер недоступен")
+    elif "No repository found" in e:
+      print("SVN, локальная копия: репозиторий не найден")
+    elif "No such revision" in e:
+      print("SVN, локальная копия: отсутствует ревизия", config.svn_rev)
     else:
-      print("Git, локальная копия: неопознанная ошибка")
-    exit(0)
-    print("SVN, локальная копия: ошибка копирования из удаленного репо. Останов")
-    exit(1)
+      print("SVN, локальная копия: неопознанная ошибка")
+
+    print("SVN, локальная копия: Останов")
+    exit(2)
   else:
     print("SVN, локальная копия: копирование из удаленного репо завершено, ревизия", config.svn_rev)
     
@@ -191,7 +192,7 @@ if not git_local_repo_found:
       print("Git, локальная копия: неопознанная ошибка")
     exit(0)
     print("Git, локальная копия: Останов")
-    exit(1)
+    exit(2)
   else:
     print("Git, локальная копия: копирование из удаленного репо завершено")
 

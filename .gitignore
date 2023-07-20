@@ -1,3 +1,4 @@
 data
 tmp
 cache
+__pycache__
