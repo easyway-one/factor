@@ -62,7 +62,7 @@ config.svn_linkrepo = svngitsynclib.remove_trail_slash(config.svn_linkrepo)
 config.svn_linkrepo = "svn://192.168.0.98/repo/factor-test"
 config.svn_user = "user"
 config.svn_pass = "pass"
-config.svn_rev = "2"
+config.svn_rev = "5"
 config.git_linkrepo = "http://giteuser:passpass@192.168.0.98:3000/factor/test.git"
 
 ### Проверка входных данных
@@ -202,6 +202,7 @@ git_need_files = {}
 pwd = os.getcwd()
 os.chdir(git_local_repo_cache);    
 git_need_files, null = svngitsynclib.git_go_mark_undel("./", git_glob_list)
+print(git_need_files)
 os.chdir(pwd)
 
 # Список файлов/папок, которые надо перенести из SVN в Git: svn_need_files
@@ -209,6 +210,7 @@ svn_need_files = {}
 pwd = os.getcwd()
 os.chdir(svn_local_repo_cache);    
 svn_need_files = svngitsynclib.svn_go_mark_undel("./", svn_glob_list)
+print(svn_need_files)
 os.chdir(pwd)
 
 # Проверка на пересечение списков файлов/папок SVN и Git
@@ -227,10 +229,16 @@ for files in svn_need_files:
   if svn_need_files[files]:
     svn_files_pack.append(files[2:])
 
+# Проверка списка файлов/папок для копирования из SVN в Git на наличие содержимого
+if " ".join(svn_files_pack).strip() == "":
+  print("Список файлов/папок для копирования из SVN в Git: ошибка! Список пустой. Останов")
+  exit(0) # Поставил нулевой код завершения, т.к. отсутствие файлов для переноса не совсем ошибка
+
 # Копирование файлов/папок для копирования из SVN в Git
 print("Копирование файлов/папок из SVN в Git: ...")
 pwd = os.getcwd()
 os.chdir(svn_local_repo_cache)
+print("tar -cf - " + " ".join(svn_files_pack) + " | (cd ../../" + git_local_repo_cache + " && tar xvf -)")
 try:
   os.system("tar -cf - " + " ".join(svn_files_pack) + " | (cd ../../" + git_local_repo_cache + " && tar xvf -)")
 except:
@@ -243,7 +251,10 @@ print("Копирование файлов/папок из SVN в Git: заве�
 print("Обновление удаленного репо Git: SVN репо: ", config.svn_linkrepo, ", ревизия: ", config.svn_rev, sep="")
 git_repo.git.add(all=True)
 git_repo.index.commit("Обновление из SVN репо: " + config.svn_linkrepo + ", ревизия: " + config.svn_rev)
-git_repo.git.push()
-exit(0)
-origin = git_repo.remote(name='origin')
-origin.push()
+try:
+  git_repo.git.push()
+except Exception as e:
+  print("Обновление удаленного репо Git: ошибка!")
+  exit(1)
+
+print("Обновление удаленного репо Git: завершено")
