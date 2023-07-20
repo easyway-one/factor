@@ -108,3 +108,10 @@ os.system("tar -cf - " + " ".join(svn_files_pack) + " | (cd ../../" + git_dir_da
 # os.remove("patch.tar")
 os.chdir(pwd)
 
+./svngitsync.py <-sl | --svn-linkrepo> <-su | --svn-user> <-sp | --svn-pass> <-sr | --svn-rev> <-gl | --git-linkrepo>
+
+-sl, --svn-linkrepo     - URL репо SVN: svn://svn_repo_url/svn_repo_path
+-su, --svn-user         - Репо SVN username
+-sp, --svn-pass         - Репо SVN password
+-sr, --svn-rev          - Репо SVN revision
+-gl, --git-linkrepo     - URL репо Git: https://git_user:git_pass@git_repo_url/git_repo_path
