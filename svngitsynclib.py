@@ -1,4 +1,4 @@
-import os, shutil
+import os, shutil, fnmatch
 
 # Удаление финального слеша в URL репо для унификации папок локальных копий репо
 def remove_trail_slash(url: str):
@@ -33,12 +33,59 @@ def clear_data_dir(dir: str):
       os.remove(d.path)
   
 # Чтение glob-масок из файлов    
-# ДОБАВИТЬ ПРОВЕРКУ НА СУЩЕСТВОВАНИЕ ФАЙЛА И СООБЩЕНИЕ ОБ ИСПОЛЬОВАНИИ ПУСТОГО МАССИВА
-def read_glob_file(glob_file: str):
+def read_glob_file(glob_file: str, descr: str):
   '''Read glob-file into array'''
   data = []
-  with open(glob_file) as f:
-    while line := f.readline().rstrip():
+  print(descr, ": чтение...")
+  try:
+    f = open(glob_file, "r")
+  except:
+    print(descr, ": ошибка чтения! Будет использован пустой список")
+  else:
+    while line := f.readline():
+      line = line.strip()
       if line.__len__:
         data.append(line)
+    f.close()
+  print(descr, ": чтение завершено")
   return data
+
+def git_go_mark_undel(dir: str, masks):
+  need = False
+  need0 = False
+  need1 = False
+  files_list = {}
+  for dirEntry in os.scandir(dir):
+    if dirEntry.name != '.git':
+      need0 = False
+      for mask in masks:
+        if fnmatch.fnmatch(dirEntry.name, mask):
+          need0 = True
+      files_list[dirEntry.path] = need0
+          
+      if dirEntry.is_dir() and files_list[dirEntry.path] == False:
+        files_list_, need1 = git_go_mark_undel(dirEntry.path, masks)
+        files_list.update(files_list_)
+        if need1:
+          files_list[dirEntry.path] = True
+
+      need = need or need0 or need1
+  return files_list, need
+
+def svn_go_mark_undel(dir: str, masks):
+  need = False
+  need0 = False
+  need1 = False
+  files_list = {}
+  for dirEntry in os.scandir(dir):
+    if dirEntry.name != '.svn':
+      need0 = False
+      for mask in masks:
+        if fnmatch.fnmatch(dirEntry.name, mask):
+          need0 = True
+      files_list[dirEntry.path] = need0
+          
+      if dirEntry.is_dir() and files_list[dirEntry.path] == False:
+        files_list_ = svn_go_mark_undel(dirEntry.path, masks)
+        files_list.update(files_list_)
+  return files_list

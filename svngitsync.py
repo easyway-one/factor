@@ -73,8 +73,8 @@ if svn_urlcheck.scheme != 'svn':
   exit(2)
 
 # Проверка на совпадающие записи в файлах с glob-масками исключений
-svn_glob_list = svngitsynclib.read_glob_file(svn_glob_file)
-git_glob_list = svngitsynclib.read_glob_file(git_glob_file)
+svn_glob_list = svngitsynclib.read_glob_file(svn_glob_file, "SVN, файл с glob-масками")
+git_glob_list = svngitsynclib.read_glob_file(git_glob_file, "Git, файл с glob-масками")
 
 glob_intersect = []
 for i in svn_glob_list:
@@ -195,19 +195,55 @@ if not git_local_repo_found:
     print("Git, локальная копия: копирование из удаленного репо завершено")
 
 
+### Работа со списками файлов/папок, соответствующих glob-маскам SVN и Git
 
+# Список файлов/папок, которые нельзя удалять из Git репо: git_need_files
+git_need_files = {}
+pwd = os.getcwd()
+os.chdir(git_local_repo_cache);    
+git_need_files, null = svngitsynclib.git_go_mark_undel("./", git_glob_list)
+os.chdir(pwd)
 
+# Список файлов/папок, которые надо перенести из SVN в Git: svn_need_files
+svn_need_files = {}
+pwd = os.getcwd()
+os.chdir(svn_local_repo_cache);    
+svn_need_files = svngitsynclib.svn_go_mark_undel("./", svn_glob_list)
+os.chdir(pwd)
 
+# Проверка на пересечение списков файлов/папок SVN и Git
+for files in git_need_files:
+  if files in svn_need_files:
+    error = git_need_files[files] and svn_need_files[files]
+  else:
+    error = False
+  if error:
+    print("Ошибка! В списках файлов/папок найдены общие пути, проверьте настройки")
+    exit(1)
 
+# Создание списка файлов/папок для копирования из SVN в Git
+svn_files_pack = []
+for files in svn_need_files:
+  if svn_need_files[files]:
+    svn_files_pack.append(files[2:])
 
+# Копирование файлов/папок для копирования из SVN в Git
+print("Копирование файлов/папок из SVN в Git: ...")
+pwd = os.getcwd()
+os.chdir(svn_local_repo_cache)
+try:
+  os.system("tar -cf - " + " ".join(svn_files_pack) + " | (cd ../../" + git_local_repo_cache + " && tar xvf -)")
+except:
+  print("Копирование файлов/папок из SVN в Git: ошибка!")
+  exit(1)
+os.chdir(pwd)
+print("Копирование файлов/папок из SVN в Git: завершено")
 
-
-
-exit(0)
-shutil.copytree(svn_local_repo_cache, git_local_repo_cache, symlinks=False, ignore=None, dirs_exist_ok=True)
-shutil.rmtree(git_local_repo_cache + '.svn', ignore_errors=True)
-
+### Обновление удаленного репо Git
+print("Обновление удаленного репо Git: SVN репо: ", config.svn_linkrepo, ", ревизия: ", config.svn_rev, sep="")
 git_repo.git.add(all=True)
-git_repo.index.commit("msg")
+git_repo.index.commit("Обновление из SVN репо: " + config.svn_linkrepo + ", ревизия: " + config.svn_rev)
+git_repo.git.push()
+exit(0)
 origin = git_repo.remote(name='origin')
 origin.push()
