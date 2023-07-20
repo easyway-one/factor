@@ -12,7 +12,8 @@
 
 **Использование:**
 ```
-./svngitsync.py <-sl | --svn-linkrepo> <-su | --svn-user> <-sp | --svn-pass> <-sr | --svn-rev> <-gl | --git-linkrepo>
+./svngitsync.py <-sl | --svn-linkrepo> <-su | --svn-user>
+                <-sp | --svn-pass> <-sr | --svn-rev> <-gl | --git-linkrepo>
 
 -sl, --svn-linkrepo     - URL репо SVN: svn://svn_repo_url/svn_repo_path
 -su, --svn-user         - Репо SVN username
