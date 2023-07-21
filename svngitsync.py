@@ -67,6 +67,27 @@ config.svn_linkrepo = svngitsynclib.remove_trail_slash(config.svn_linkrepo)
 
 ### Проверка входных данных
 # Проверка данных из комстроки
+
+if not config.svn_linkrepo:
+  print("Ошибка! Не задан URL репо SVN")
+  exit(2)
+
+if not config.svn_user:
+  print("Ошибка! Не задано имя пользователя для доступа к репо SVN")
+  exit(2)
+
+if not config.svn_pass:
+  print("Ошибка! Не задан пароль для доступа к репо SVN")
+  exit(2)
+
+if not config.svn_rev:
+  print("Ошибка! Не задана ревизия репо SVN")
+  exit(2)
+
+if not config.git_linkrepo:
+  print("Ошибка! Не задан URL репо Git")
+  exit(2)
+
 svn_urlcheck = urlparse(config.svn_linkrepo)
 if svn_urlcheck.scheme != 'svn':
   print('Ошибка! протокол для SVN задан: ', svn_urlcheck.scheme, '://, ожидается: svn://', sep='')
