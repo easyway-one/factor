@@ -50,11 +50,11 @@ git_glob_file = "git.txt" # Файл glob-масок для Git
 # возможно включение интерактивного режима
 arg_interact = False # True - для влючения интерактивного режима
 parser = argparse.ArgumentParser(description="", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument("-sl", "--svn-linkrepo", required=arg_interact, default="''", action="store", help="SVN repo URL, ex: svn://svn_repo_url/svn_repo_path")
-parser.add_argument("-su", "--svn-user", required=arg_interact, default="''", action="store", help="SVN repo username")
-parser.add_argument("-sp", "--svn-pass", required=arg_interact, default="''", action="store", help="SVN repo password")
-parser.add_argument("-sr", "--svn-rev", required=arg_interact, default="''", action="store", help="SVN repo revision")
-parser.add_argument("-gl", "--git-linkrepo", required=arg_interact, default="''", action="store", help="Git repo URL, ex: https://git_user:git_pass@git_repo_url/git_repo_path")
+parser.add_argument("-sl", "--svn-linkrepo", required=arg_interact, default="", action="store", help="SVN repo URL, ex: svn://svn_repo_url/svn_repo_path")
+parser.add_argument("-su", "--svn-user", required=arg_interact, default="", action="store", help="SVN repo username")
+parser.add_argument("-sp", "--svn-pass", required=arg_interact, default="", action="store", help="SVN repo password")
+parser.add_argument("-sr", "--svn-rev", required=arg_interact, default="", action="store", help="SVN repo revision")
+parser.add_argument("-gl", "--git-linkrepo", required=arg_interact, default="", action="store", help="Git repo URL, ex: https://git_user:git_pass@git_repo_url/git_repo_path")
 config = parser.parse_args()
 config.svn_linkrepo = svngitsynclib.remove_trail_slash(config.svn_linkrepo)
 
@@ -68,27 +68,27 @@ config.svn_linkrepo = svngitsynclib.remove_trail_slash(config.svn_linkrepo)
 ### Проверка входных данных
 # Проверка данных из комстроки
 
-if not config.svn_linkrepo:
+if not config.svn_linkrepo.strip():
   print("Ошибка! Не задан URL репо SVN")
   exit(2)
 
-if not config.svn_user:
+if not config.svn_user.strip():
   print("Ошибка! Не задано имя пользователя для доступа к репо SVN")
   exit(2)
 
-if not config.svn_pass:
+if not config.svn_pass.strip():
   print("Ошибка! Не задан пароль для доступа к репо SVN")
   exit(2)
 
-if not config.svn_rev:
+if not config.svn_rev.strip():
   print("Ошибка! Не задана ревизия репо SVN")
   exit(2)
 
-if not config.git_linkrepo:
+if not config.git_linkrepo.strip():
   print("Ошибка! Не задан URL репо Git")
   exit(2)
 
-svn_urlcheck = urlparse(config.svn_linkrepo)
+svn_urlcheck = urlparse(config.svn_linkrepo.strip())
 if svn_urlcheck.scheme != 'svn':
   print('Ошибка! протокол для SVN задан: ', svn_urlcheck.scheme, '://, ожидается: svn://', sep='')
   exit(2)
