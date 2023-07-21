@@ -59,11 +59,11 @@ config = parser.parse_args()
 config.svn_linkrepo = svngitsynclib.remove_trail_slash(config.svn_linkrepo)
 
 # Тестовый блок, чтобы не забивать комстроку
-# config.svn_linkrepo = "svn://192.168.0.98/repo/factor-test"
-# config.svn_user = "user"
-# config.svn_pass = "pass"
-# config.svn_rev = "5"
-# config.git_linkrepo = "http://giteuser:passpass@192.168.0.98:3000/factor/test.git"
+config.svn_linkrepo = "svn://192.168.0.98/repo/factor-test"
+config.svn_user = "user"
+config.svn_pass = "pass"
+config.svn_rev = "5"
+config.git_linkrepo = "http://giteuser:passpass@192.168.0.98:3000/factor/test.git"
 
 ### Проверка входных данных
 # Проверка данных из комстроки
