@@ -1,5 +1,6 @@
 import os, shutil, fnmatch
 
+
 # Удаление финального слеша в URL репо для унификации папок локальных копий репо
 def remove_trail_slash(url: str) -> str:
   '''
@@ -14,6 +15,7 @@ def remove_trail_slash(url: str) -> str:
   if url.endswith('/'):
     url = url[:-1]
   return url
+
 
 # Проверка на существование/создание папок для локальных копий репо
 def make_data_dir(dir: str, descr: str):
@@ -37,6 +39,7 @@ def make_data_dir(dir: str, descr: str):
   else:
     print(descr, "(", dir, "): обнаружена", sep="")
 
+
 # Очищение папки с локальной копией репо
 def clear_data_dir(dir: str):
   '''
@@ -50,6 +53,7 @@ def clear_data_dir(dir: str):
       shutil.rmtree(d.path)
     else:
       os.remove(d.path)
+
   
 # Чтение glob-масок из файлов    
 def read_glob_file(glob_file: str, descr: str) -> list:
@@ -74,6 +78,7 @@ def read_glob_file(glob_file: str, descr: str) -> list:
     f.close()
   print(descr, ": чтение завершено")
   return data
+
 
 # Создание списка нужных файлов/папок из репо Git
 def git_go_mark_undel(dir: str, masks: list) -> tuple:
@@ -109,6 +114,7 @@ def git_go_mark_undel(dir: str, masks: list) -> tuple:
 
       need = need or need0 or need1
   return files_list, need
+
 
 # Создание списка нужных файлов/папок из репо SVNs
 def svn_go_mark_undel(dir: str, masks: list) -> dict:

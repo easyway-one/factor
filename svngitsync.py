@@ -178,6 +178,7 @@ if not svn_local_repo_found:
 # Обновление локальной копии или
 # Выгрузка удаленного репо Git в локальную папку
 git_local_repo_found = True # Флаг наличия/отутствия локальной копии репо Git (True/False)
+git_repo = Repo()
 print("Git, локальная копия: поиск...")
 
 # Обновление локальной копии на нужную ревизию, 
@@ -202,7 +203,7 @@ else:
 if not git_local_repo_found:
   print("Git, локальная копия: копирование из удаленного репо")
   try:
-    git_repo = Repo()
+    # git_repo = Repo() # перенесено вверх для выключения отображения ошибки
     git_repo.clone_from(config.git_linkrepo, git_local_repo_cache)
   except Exception as e:
     error = str(e.stderr)
