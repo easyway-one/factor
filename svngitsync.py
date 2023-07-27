@@ -54,15 +54,15 @@ arg_interact = False  # True - для влючения интерактивно�
 parser = argparse.ArgumentParser(
     description="", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("-sl", "--svn-linkrepo", required=arg_interact, default="",
-                    action="store", help="SVN repo URL, ex: svn://svn_repo_url/svn_repo_path")
+    action="store", help="SVN repo URL, ex: svn://svn_repo_url/svn_repo_path")
 parser.add_argument("-su", "--svn-user", required=arg_interact,
-                    default="", action="store", help="SVN repo username")
+    default="", action="store", help="SVN repo username")
 parser.add_argument("-sp", "--svn-pass", required=arg_interact,
-                    default="", action="store", help="SVN repo password")
+    default="", action="store", help="SVN repo password")
 parser.add_argument("-sr", "--svn-rev", required=arg_interact,
-                    default="", action="store", help="SVN repo revision")
+    default="", action="store", help="SVN repo revision")
 parser.add_argument("-gl", "--git-linkrepo", required=arg_interact, default="", action="store",
-                    help="Git repo URL, ex: https://git_user:git_pass@git_repo_url/git_repo_path")
+    help="Git repo URL, ex: https://git_user:git_pass@git_repo_url/git_repo_path")
 config = parser.parse_args()
 config.svn_linkrepo = svngitsynclib.remove_trail_slash(config.svn_linkrepo)
 
@@ -117,7 +117,7 @@ for i in svn_glob_list:
 
 if len(glob_intersect):
     print("Ошибка! В файлах", svn_glob_file, git_glob_file,
-          "не должно быть совпадающих масок. Совпадения: ")
+        "не должно быть совпадающих масок. Совпадения: ")
     for i in glob_intersect:
         print("'", i, "'", sep="", end=" ")
     exit(2)
@@ -175,8 +175,8 @@ if not svn_local_repo_found:
     svn_repo.set_default_password(config.svn_pass)
     try:
         svn_repo.checkout(config.svn_linkrepo,
-                          svn_local_repo_cache,
-                          revision=pysvn.Revision(pysvn.opt_revision_kind.number, config.svn_rev))
+            svn_local_repo_cache,
+            revision=pysvn.Revision(pysvn.opt_revision_kind.number, config.svn_rev))
     except Exception as e:
         error = str(e)
         if "callback_get_login" in error:
@@ -301,7 +301,7 @@ pwd = os.getcwd()
 os.chdir(svn_local_repo_cache)
 try:
     os.system("tar -cf - " + " ".join(svn_files_pack) +
-              " | (cd ../../" + git_local_repo_cache + " && tar xf -)")
+        " | (cd ../../" + git_local_repo_cache + " && tar xf -)")
 except:
     print("Копирование файлов/папок из SVN в Git: ошибка!")
     exit(1)
@@ -310,10 +310,10 @@ print("Копирование файлов/папок из SVN в Git: заве�
 
 # Обновление удаленного репо Git
 print("Обновление удаленного репо Git: SVN репо: ",
-      config.svn_linkrepo, ", ревизия: ", config.svn_rev, sep="")
+    config.svn_linkrepo, ", ревизия: ", config.svn_rev, sep="")
 git_repo.git.add(all=True)
 git_repo.index.commit("Обновление из SVN репо: " +
-                      config.svn_linkrepo + ", ревизия: " + config.svn_rev)
+    config.svn_linkrepo + ", ревизия: " + config.svn_rev)
 try:
     git_repo.git.push()
 except Exception as e:
